@@ -1,48 +1,40 @@
 import styles from './App.module.css';
-import {useEffect, useState} from "react";
-import axios from 'axios';
+import {useState} from "react";
+import {Details} from "./Components/Details";
+import {UsersList} from "./Components/UsersList";
+import {SearchField} from "./Components/SearchFild";
+import {Preloader} from "./Components/Preloader";
 
-type UserType = {
+export type UserType = {
   login: string
   id: number
+  avatar_url: string
+  bio: string
 }
 
-function App() {
+const App = () => {
 
-  const [searchString, setSearchString] = useState("FireYourGuns")
-  const [inputValue, setInputalue] = useState('FireYourGuns')
-  const [users, setUsers] = useState<UserType[]>([])
-  const [selectedUser, setSelectedUser] = useState<string | null>(null)
-
-  useEffect(() => {
-    axios
-      .get(`https://api.github.com/search/users?q=${searchString}`)
-      .then(res => setUsers(res.data.items))
-  }, [searchString])
+  const [searchString, setSearchString] = useState("Fire")
+  const [userDetails, setUserDetails] = useState<UserType | null>(null)
+  const [seconds, setSeconds] = useState<number>(10);
+  const [isUserReceived, setIsUserReceived] = useState(false);
 
   return (
     <div>
-      <div>
-        <input
-          type="text"
-          value={inputValue}
-          onChange={(event) => setInputalue(event.currentTarget.value)}/>
-        <button
-          onClick = {() => setSearchString(inputValue)}>
-          Find
-        </button>
-      </div>
-      <div>
-        <ul>
-          {users.map((el, i) => {
-            return <li
-              className = {selectedUser === el.login? styles.active : ""}
-              key={el.id}
-              onClick={() => {setSelectedUser(el.login)}}>
-              {el.login}
-            </li>
-          })}
-        </ul>
+      <SearchField setSearchString={setSearchString}/>
+      <div className={styles.usersWrapper}>
+        <UsersList searchString={searchString}
+                   setUserDetails={setUserDetails}
+                   setIsUserReceived={setIsUserReceived}
+                   setSeconds={setSeconds}/>
+        {
+          seconds >= 1
+            ? <Details userDetails={userDetails}
+                       seconds={seconds}
+                       isUserReceived={isUserReceived}
+                       setSeconds={setSeconds}/>
+            : null
+        }
       </div>
     </div>
   );
